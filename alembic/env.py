@@ -8,14 +8,15 @@ import os
 
 # Укажите путь к вашему файлу с моделями
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from main import metadata  # замените на ваш файл и название metadata
+#from main import metadata  # замените на ваш файл и название metadata
+from models.models import Base
 
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = metadata
+target_metadata = Base.metadata
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode."""
