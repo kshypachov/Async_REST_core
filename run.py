@@ -11,6 +11,7 @@ try:
     logger = logging.getLogger(__name__)
     logger.info("Configuration loaded")
     logger.info("Starting REST APP")
+    logger.debug("Starting REST APP_ DEBUG")
 except ValueError as e:
     logging.critical(f"Failed to load configuration: {e}")
     exit(1)

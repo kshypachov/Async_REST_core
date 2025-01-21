@@ -2,13 +2,11 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from config.config import get_database_url
-from main import DATABASE_URL
+# from main import DATABASE_URL
 import logging
 
 # створюється екземпляр класу logger
 logger = logging.getLogger(__name__)
-
-#DATABASE_URL = "mysql+aiomysql://async:async@10.0.20.242/async"
 
 try:
     DATABASE_URL = get_database_url()
