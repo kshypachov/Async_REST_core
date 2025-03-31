@@ -9,13 +9,16 @@ from typing import Optional
 from sqlalchemy import insert
 from datetime import date
 import uuid
+import logging
 
 #router = APIRouter()
+
 # Приложение FastAPI для внешних пользователей с документацией по адресу /external/docs
 external = FastAPI(docs_url="/docs", openapi_url="/openapi.json")
-
+logger = logging.getLogger(__name__)
 @external.post("/request/")
 async def create_request(person: RequestCreate, db: AsyncSession = Depends(get_db)):
+    logger.debug(f"Отримано данні {person}")
     request_id = str(uuid.uuid4())
 
     # Преобразование данных Pydantic модели в словарь
