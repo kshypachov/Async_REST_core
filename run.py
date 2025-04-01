@@ -1,15 +1,14 @@
 import logging
-from config.config import load_config, configure_logging
+from config.config import load_config, configure_logging, get_logger
 
 try:
     load_config("config.ini")
     configure_logging()
-    logger = logging.getLogger(__name__)
+    logger = get_logger(__name__)
     logger.info("Configuration loaded")
-    logger.info("Starting REST APP")
 
 except ValueError as e:
-    logging.critical(f"Failed to load configuration: {e}")
+    print(f"Failed to load configuration: {e}")
     exit(1)
 
 # Только теперь импортируем FastAPI и роутеры
@@ -18,8 +17,10 @@ from routers.external import external
 from routers.internal import internal
 
 app = FastAPI()
-app.mount("/external", external)
-app.mount("/internal", internal)
+# app.mount("/external", external)
+# app.mount("/internal", internal)
+app.include_router(external, prefix="/external", tags=["external"])
+app.include_router(internal, prefix="/internal", tags=["internal"])
 
 
 

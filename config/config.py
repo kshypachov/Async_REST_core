@@ -3,9 +3,12 @@ import logging
 import os
 
 _config = None
+_logging = None
 
 # створюється екземпляр класу logger
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
+
+#logger = logging.getLogger("myapp")
 
 # Функція для зчитування конфігураційного файлу
 def load_config(file_path: str, defaults: dict = None) -> configparser.ConfigParser:
@@ -14,11 +17,12 @@ def load_config(file_path: str, defaults: dict = None) -> configparser.ConfigPar
 
     # Перевіряємо USE_ENV_CONFIG, і якщо true, не зчитуємо файл конфігурації
     if os.getenv("USE_ENV_CONFIG", "false").lower() == "true":
-        logger.info("Skipping config file loading, using environment variables only.")
+#        logger.info("Skipping config file loading, using environment variables only.")
+        print("Skipping config file loading, using environment variables only.")
     else:
         # Зчитуємо конфігураційний файл тільки якщо USE_ENV_CONFIG не true
         if not _config.read(file_path):
-            logger.error(f"Configuration file {file_path} not found or is empty.")
+  #          logger.error(f"Configuration file {file_path} not found or is empty.")
             raise FileNotFoundError(f"Configuration file {file_path} not found or is empty.")
 
     return _config
@@ -65,7 +69,7 @@ def get_database_url(config: configparser.ConfigParser = None) -> str:
 
     if missing_params:
         missing_params_str = ", ".join(missing_params)
-        logger.error(f"Не вистачає наступних параметрів для підключення до бази даних: {missing_params_str}")
+        #logger.error(f"Не вистачає наступних параметрів для підключення до бази даних: {missing_params_str}")
         raise ValueError(f"Missing database connection parameters: {missing_params_str}")
 
     return f"mysql+aiomysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
@@ -86,6 +90,13 @@ def configure_logging(config: configparser.ConfigParser = None):
     if not log_filename:
         log_filename = None
 
+    if not log_format:
+        log_format = "%(levelname)s:     %(message)s"
+
+    if not log_datefmt:
+        log_datefmt = "%Y-%m-%d %H:%M:%S"
+
+
     print(f"Config logging level: {log_level}")
     print(f"log_level: {getattr(logging, log_level, logging.DEBUG)}")
 
@@ -96,6 +107,15 @@ def configure_logging(config: configparser.ConfigParser = None):
         datefmt=log_datefmt,
         level=getattr(logging, log_level, logging.DEBUG)
     )
+    global _logging
+    _logging = logging
 
-    # logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
-    # logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+def get_logger(name: str) -> logging.Logger:
+    global _logging
+
+    if _logging is None:
+        print ("Логування не налаштовано")
+        exit(1)
+
+    my_logger = _logging.getLogger(name)
+    return my_logger

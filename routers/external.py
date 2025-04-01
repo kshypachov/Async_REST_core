@@ -9,15 +9,19 @@ from typing import Optional
 from sqlalchemy import insert
 from datetime import date
 import uuid
-import logging
+from config.config import get_logger
 
 #router = APIRouter()
 
 # Приложение FastAPI для внешних пользователей с документацией по адресу /external/docs
-external = FastAPI(docs_url="/docs", openapi_url="/openapi.json")
-logger = logging.getLogger(__name__)
+# external = FastAPI(docs_url="/docs", openapi_url="/openapi.json")
+# logger = logging.getLogger(__name__)
+external = APIRouter()
+logger = get_logger(__name__)
+
 @external.post("/request/")
 async def create_request(person: RequestCreate, db: AsyncSession = Depends(get_db)):
+    logger.debug("Початок обробки запиту POST /external/request")
     logger.debug(f"Отримано данні {person}")
     request_id = str(uuid.uuid4())
 
@@ -38,24 +42,31 @@ async def create_request(person: RequestCreate, db: AsyncSession = Depends(get_d
 
     await db.execute(query)
     await db.commit()
+    logger.debug(f"Запит записано у БД та сформовано id заявки: {request_id} ")
     return {"request UUID": request_id}
 
 # Получение статуса заявки
 @external.get("/request/{request_id}", response_model=dict)
 async def get_request_status(request_id: str, db: AsyncSession = Depends(get_db)):
+    logger.debug("Початок обробки запиту GET /external/request/{request_id}")
+    logger.debug(f"Отримано запит з айді {request_id}")
     query = sqlalchemy.select(request_table.c.status, request_table.c.UUID).where(request_table.c.UUID == request_id)
     result = await db.execute(query)
     request_data = result.fetchone()
 
     if request_data is None:
+        logger.debug(f"Не знайдено інформації для запиту з айді {request_id}")
         raise HTTPException(status_code=404, detail="Request not found")
 
+    logger.debug(f"На запит з айді {request_id} сформовано дані для відповіді {request_data}")
     # Преобразуем объект Row в словарь с помощью ._mapping
     return dict(request_data._mapping)
 
 # Получение найденной информации о человеке по заявке
 @external.get("/request/{request_id}/found_person", response_model=dict)
 async def get_found_person(request_id: str, db: AsyncSession = Depends(get_db)):
+    logger.debug("Початок обробки запиту GET /external/request/{request_id}/found_person")
+    logger.debug(f"Отримано запит з айді {request_id}")
     # Ищем заявку с указанным UUID и статусом "completed"
     query = request_table.select().where(
         (request_table.c.UUID == request_id) &
@@ -66,10 +77,12 @@ async def get_found_person(request_id: str, db: AsyncSession = Depends(get_db)):
 
     # Если заявка не найдена или статус не "completed"
     if request_data is None:
-        raise HTTPException(status_code=404, detail="Request not found")
+        logger.debug(f"Не знайдено інформації для запиту з айді {request_id} чи це заявка ще не готова")
+        raise HTTPException(status_code=404, detail="Request not found or incomplete")
 
     # Если заявка уже была загружена (поле downloaded == True)
     if request_data._mapping["downloaded"]:
+        logger.debug(f"Запит з айді {request_id} вже було завантажено")
         raise HTTPException(status_code=409, detail="Request already downloaded")
 
     # Ищем данные о персоне, связанные с заявкой
@@ -90,5 +103,6 @@ async def get_found_person(request_id: str, db: AsyncSession = Depends(get_db)):
     person_dict = dict(person_data._mapping)
     person_dict.pop("id", None)
 
+    logger.debug(f"На запит з айді {request_id} сформовано дані для відповіді {person_dict}")
     # Возвращаем данные о персоне
     return person_dict

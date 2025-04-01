@@ -8,15 +8,21 @@ from typing import Optional
 from sqlalchemy import insert
 from datetime import date
 import uuid
+import logging
+from config.config import get_logger
 
 #router = APIRouter()
 # Приложение FastAPI для внутренних пользователей с документацией по адресу /internal/docs
-internal = FastAPI(docs_url="/docs", openapi_url="/openapi.json")
+# internal = FastAPI(docs_url="/docs", openapi_url="/openapi.json")
+internal = APIRouter()
+#logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Обновление статуса заявки
 @internal.put("/request/{request_id}", response_model=dict)
 async def update_request(request_id: str, request_update: RequestUpdate, db: AsyncSession = Depends(get_db)):
     # Преобразуем данные модели в словарь, исключая unset поля
+    logger.debug(f"Отримано запит GET /internal/request/{request_id} з даними {request_update}")
     update_data = request_update.dict(exclude_unset=True)
 
     # Выполняем обновление только с переданными полями
@@ -24,15 +30,18 @@ async def update_request(request_id: str, request_update: RequestUpdate, db: Asy
     await db.execute(query)
     await db.commit()
 
+    logger.debug(f"Запит {request_id} оновлено")
     return {"message": "Request updated"}
 
 # Ввод найденной информации о человеке по заявке
 @internal.post("/request/{request_id}/found_person", response_model=dict)
 async def add_found_person(request_id: str, person_info: PersonInfoUpdate, db: AsyncSession = Depends(get_db)):
+    logger.debug(f"Отримано запит POST /internal/request/{request_id}/found_person з даними {person_info}")
     query = request_table.select().where(request_table.c.UUID == request_id)
     result = await db.execute(query)
     request_exists = result.fetchone()
     if not request_exists:
+        logger.debug(f"Не знайдено заявки з таким request_id {request_id}")
         raise HTTPException(status_code=404, detail="Request not found")
 
     person_query = person_table.insert().values(**person_info.dict(exclude_unset=True))
@@ -42,6 +51,7 @@ async def add_found_person(request_id: str, person_info: PersonInfoUpdate, db: A
     update_query = request_table.update().where(request_table.c.UUID == request_id).values(found_person_id=person_id)
     await db.execute(update_query)
     await db.commit()
+    logger.debug(f"Запит POST /internal/request/{request_id}/found_person оброблено та додано дані {person_info} з айді {person_id}")
     return {"person_id": person_id}
 
 # Получение всех заявок на поиск информации
@@ -54,6 +64,7 @@ async def get_all_requests(
     person_data: Optional[str] = None,
     db: AsyncSession = Depends(get_db)
 ):
+    logger.debug(f"Отримано запит GET /internal/requests з даними для пошуку: статус {status} коментарій {comment} завантажено {downloaded} унікальний айді {UUID} персональні дані {person_data}")
     # Базовый запрос
     query = request_table.select()
 
@@ -72,5 +83,6 @@ async def get_all_requests(
     result = await db.execute(query)
     requests = result.fetchall()
 
+    logger.debug(f"За запитом знайдено дані {requests}")
     # Преобразуем каждую строку в словарь
     return [dict(row._mapping) for row in requests]

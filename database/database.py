@@ -2,10 +2,10 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from config.config import get_database_url
-import logging
+from config.config import get_logger
 
 # створюється екземпляр класу logger
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 try:
     DATABASE_URL = get_database_url()
