@@ -3,9 +3,8 @@ import sqlalchemy
 from fastapi import APIRouter, Depends, HTTPException, FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.models import request_table, person_table
-from schemas.schemas import RequestCreate, RequestUpdate, PersonInfoUpdate, RequestStatusEnum
+from schemas.schemas import RequestCreate, RequestStatusEnum
 from database.database import get_db
-from typing import Optional
 from sqlalchemy import insert
 from datetime import date
 import uuid

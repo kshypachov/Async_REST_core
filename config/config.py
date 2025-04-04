@@ -1,6 +1,7 @@
 import configparser
 import logging
 import os
+from colorlog import ColoredFormatter
 
 _config = None
 _logging = None
@@ -86,6 +87,8 @@ def configure_logging(config: configparser.ConfigParser = None):
     log_datefmt = get_config_param(config, 'logging', 'dateformat', 'LOG_DATEFORMAT', default=None)
     log_level = get_config_param(config, 'logging', 'level', 'LOG_LEVEL', default="info").upper()
 
+    print(f"Config logging level: {log_level}")
+
     # Якщо log_filename пустий, то виводимо логи в консоль (stdout)
     if not log_filename:
         log_filename = None
@@ -95,10 +98,6 @@ def configure_logging(config: configparser.ConfigParser = None):
 
     if not log_datefmt:
         log_datefmt = "%Y-%m-%d %H:%M:%S"
-
-
-    print(f"Config logging level: {log_level}")
-    print(f"log_level: {getattr(logging, log_level, logging.DEBUG)}")
 
     logging.basicConfig(
         filename=log_filename,
