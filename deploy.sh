@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Змінні для конфігурації
-REPO_URL="https://github.com/kshypachov/FastAPI_trembita_service.git"
-PROJECT_DIR="FastAPI_trembita_service"
+REPO_URL="https://github.com/kshypachov/Async_REST_core.git"
+PROJECT_DIR="Async_REST_core"
 VENV_DIR="venv"
 DB_USER="your_db_user"
 DB_PASSWORD="your_db_password"
@@ -54,7 +54,7 @@ pip install -r requirements.txt
 
 # Налаштування конфігурації бази даних
 echo "Налаштування конфігурації бази даних..."
-sed -i "s/^sqlalchemy.url = .*/sqlalchemy.url = mariadb+mariadbconnector:\/\/$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT\/$DB_NAME/" alembic.ini
+sed -i "s/^sqlalchemy.url = .*/sqlalchemy.url = mysql+aiomysql:\/\/$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT\/$DB_NAME/" alembic.ini
 sed -i "s/^host = .*/host = $DB_HOST/" config.ini
 sed -i "s/^port = .*/port = $DB_PORT/" config.ini
 sed -i "s/^name = .*/name = $DB_NAME/" config.ini
