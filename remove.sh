@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -e
+
 # Змінні для конфігурації
-PROJECT_DIR="FastAPI_trembita_service"
+PROJECT_DIR="Async_REST_core"
 VENV_DIR="venv"
-SERVICE_NAME="fastapi_trembita_service"
+SERVICE_NAME="async_rest_trembita"
 CONFIG_FILE="config.ini"
 
 # Функція для зчитування параметрів з config.ini
