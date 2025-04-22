@@ -12,7 +12,7 @@ except ValueError as e:
     exit(1)
 
 # Только теперь импортируем FastAPI и роутеры
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from routers.external import external
 from routers.internal import internal
 
@@ -22,7 +22,25 @@ app = FastAPI()
 app.include_router(external, prefix="/external", tags=["external"])
 app.include_router(internal, prefix="/internal", tags=["internal"])
 
+@app.middleware("http")
+async def log_request_headers(request: Request, call_next):
+    headers = dict(request.headers)
+    logger.info("Заголовки запиту:")
+    for header_key, header_value in headers.items():
+        logger.info(f"    {header_key}: {header_value}")
 
+    # Отримання query параметрів
+    query_params = request.query_params
+    query_id = query_params.get("queryId")
+    user_id = query_params.get("userId")
+
+    if query_id:
+        logger.info(f"Значення параметру запиту queryId: {query_id}")
+    if user_id:
+        logger.info(f"Значення параметру запиту userId: {user_id}")
+
+    response = await call_next(request)
+    return response
 
 if __name__ == "__main__":
     import uvicorn
