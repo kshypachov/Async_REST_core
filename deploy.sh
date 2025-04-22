@@ -9,7 +9,7 @@ DB_PASSWORD="your_db_password"
 DB_NAME="your_db_name"
 DB_HOST="localhost" # Використовується localhost для встановлення MariaDB на цьому сервері
 DB_PORT="3306"      # Порт за замовчуванням для MariaDB
-SERVICE_NAME="fastapi_trembita_service"
+SERVICE_NAME="async_rest_trembita"
 APP_MODULE="main:app" # Вкажіть правильний модуль додатку
 
 # Встановлення системних залежностей
@@ -70,7 +70,7 @@ alembic upgrade head
 echo "Створення unit файлу для systemd..."
 sudo bash -c "cat > /etc/systemd/system/$SERVICE_NAME.service" << EOL
 [Unit]
-Description=FastAPI Trembita Service
+Description=$SERVICE_NAME service
 After=network.target
 
 [Service]
@@ -90,4 +90,4 @@ sudo systemctl daemon-reload
 sudo systemctl start $SERVICE_NAME
 sudo systemctl enable $SERVICE_NAME
 
-echo "Встановлення завершено! Сервіс запущено та додано в автозапуск."
+echo "Встановлення завершено! Сервіс $SERVICE_NAME запущено та додано в автозапуск."
