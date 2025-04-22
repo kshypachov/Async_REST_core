@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Змінні для конфігурації
 REPO_URL="https://github.com/kshypachov/Async_REST_core.git"
 PROJECT_DIR="Async_REST_core"
@@ -10,7 +12,9 @@ DB_NAME="your_db_name"
 DB_HOST="localhost" # Використовується localhost для встановлення MariaDB на цьому сервері
 DB_PORT="3306"      # Порт за замовчуванням для MariaDB
 SERVICE_NAME="async_rest_trembita"
-APP_MODULE="main:app" # Вкажіть правильний модуль додатку
+APP_MODULE="run:app" # Модуль додатку
+APP_PORT="8000"
+APP_HOST="0.0.0.0"
 
 # Встановлення системних залежностей
 echo "Встановлення системних залежностей..."
@@ -76,7 +80,7 @@ After=network.target
 [Service]
 User=$USER
 WorkingDirectory=$PWD
-ExecStart=$PWD/$VENV_DIR/bin/uvicorn $APP_MODULE --host 0.0.0.0 --port 8000
+ExecStart=$PWD/$VENV_DIR/bin/uvicorn $APP_MODULE --host $APP_HOST --port $APP_PORT
 Restart=always
 RestartSec=3
 
